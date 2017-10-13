@@ -14,6 +14,7 @@ public class Character {
     private int stamina;
     private int maxStamina;
     private Dice dice;
+    private Weapon weapon;
 
 
     // Getters & Setters
@@ -108,7 +109,29 @@ public class Character {
     }
 
 
+
+    /**
+     *
+     * @return (Weapon) L'arme du personnage
+     */
+    public Weapon getWeapon(){
+        return this.weapon;
+    }
+
+    /**
+     * Modifie l'arme du personnage
+     * @param weapon L'arme du personnage
+     */
+    public void setWeapon(Weapon weapon){
+        this.weapon = weapon;
+    }
+
+
+
+
     // Constructeurs
+
+
 
 
     /**
@@ -128,7 +151,11 @@ public class Character {
     }
 
 
+
+
     // Méthodes
+
+
 
 
     /**
@@ -160,28 +187,41 @@ public class Character {
      * Réarrange les statistiques du personnage et de l'arme
      * @return (int) La valeur des dégâts
      */
-    public int attackWith(Weapon weapon) {
+    private int attackWith(Weapon weapon) {
         int damage = 0;
 
         weapon.use();
 
         if (!weapon.isBroken()) {
             int precision = this.dice.roll();
-            damage = (int) (weapon.getMinDamage() + (weapon.getMaxDamage()-weapon.getMinDamage()) * (precision/100));
+            damage = (int) (weapon.getMinDamage() + (((weapon.getMaxDamage()-weapon.getMinDamage()) * precision)/100));
 
         }
 
-        this.setStamina(this.getStamina()-weapon.getStamCost());
-
-        if (this.getStamina()<0) {
-            while (this.getStamina()<0) {
-                this.setStamina(this.getStamina() + 1);
-                damage--;
-            }
+        if (this.getStamina() < weapon.getStamCost()){
+            damage = damage/(int)(this.getStamina()-weapon.getStamCost())/100;
+            this.setStamina(0);
+        }
+        else {
+            this.setStamina(this.getStamina() - weapon.getStamCost());
         }
 
-        if (damage < 0)
-            damage = 0;
+        return damage;
+    }
+
+    /**
+     * Action d'attaquer
+     * @return (int) La valeur des dégâts
+     */
+    public int attack() {
+        return attackWith(this.getWeapon());
+    }
+
+
+    public int getHitWith(int value) {
+        int damage = this.getLife()<value ? this.getLife() : value;
+
+        this.setLife(this.getLife()-damage);
 
         return damage;
     }
